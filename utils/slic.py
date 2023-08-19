@@ -3,6 +3,8 @@ from skimage import io, color
 import numpy as np
 from tqdm import trange
 
+# https://github.com/laixintao/slic-python-implementation/blob/master/slic.py
+# https://github.com/darshitajain/SLIC/blob/master/SLIC_Algorithm.ipynb
 
 class Cluster(object):
     cluster_index = 1
