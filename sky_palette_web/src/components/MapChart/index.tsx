@@ -45,7 +45,7 @@ const MapChart = () => {
               textAnchor="end"
               alignmentBaseline="middle"
               fill="#F53"
-              font-size="30px"
+              fontSize="30px"
             >
               {colorOrigin.state}
             </text>

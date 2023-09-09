@@ -54,7 +54,7 @@ function Palette(props: PalettePageProps, ref: PalettePageRef) {
           <div className="flex-col w-[400px] max-w-[400px] mt-10 items-center">
             {colorOrigin && (
               <div className="align-center text-center">
-                You are viewing the palette of {colorOrigin.state}'s sky at{" "}
+                You are viewing the palette of {colorOrigin.state}&apos;s sky at{" "}
                 {colorOrigin.time}{" "}
               </div>
             )}
@@ -68,7 +68,7 @@ function Palette(props: PalettePageProps, ref: PalettePageRef) {
                       setSelectedPaletteColorIndex(idx);
                     }}
                     key={`${color.r}${color.g}${color.b}`}
-                    className={`w-[${colorPercentage}%] h-24 cursor-pointer`}
+                    className={`grow h-24 cursor-pointer`}
                     style={{
                       border:
                         idx === selectedPaletteColorIndex
