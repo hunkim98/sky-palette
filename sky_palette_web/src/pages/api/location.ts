@@ -22,6 +22,7 @@ export default async function handler(
         }
       );
       if (response.data.results.length === 0) {
+        console.log("No location found", response.data);
         res.status(404).json({ lat: null, lng: null });
         return;
       }
