@@ -3,12 +3,13 @@ import { Inter } from "next/font/google";
 import useSWR from "swr";
 import { ColorArea } from "@react-spectrum/color";
 import { parseColor } from "@react-stately/color";
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useContext, useEffect, useState } from "react";
 import { Button } from "@adobe/react-spectrum";
 import Layout from "@/components/Layout";
 import PageTransition from "@/components/PageTransition";
 import { useRouter } from "next/router";
 import { onTheLeft, onTheRight } from "@/config";
+import { ColorContext } from "@/context/ColorContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,9 +27,7 @@ function Home(props: IndexPageProps, ref: IndexPageRef) {
   let [currentValue, setCurrentValue] = useState(
     parseColor("hsl(50, 100%, 50%)")
   );
-  const [colorQueries, setColorQueries] = useState<Map<number, string>>(
-    new Map([[0, "hsl(50, 100%, 50%)"]])
-  );
+  const { colorQueries, setColorQueries } = useContext(ColorContext);
   const [selectedColorQueryIndex, setSelectedColorQueryIndex] = useState(0);
 
   useEffect(() => {
