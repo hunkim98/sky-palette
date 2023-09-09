@@ -3,18 +3,23 @@ import { Inter } from "next/font/google";
 import useSWR from "swr";
 import { ColorArea } from "@react-spectrum/color";
 import { parseColor } from "@react-stately/color";
-import { forwardRef, useContext, useEffect, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { Button } from "@adobe/react-spectrum";
 import Layout from "@/components/Layout";
 import PageTransition from "@/components/PageTransition";
 import { useRouter } from "next/router";
 import { onTheLeft, onTheRight } from "@/config";
 import { ColorContext } from "@/context/ColorContext";
+import { ColorRgb, findColorDifference } from "@/utils/color";
+import { color } from "framer-motion";
 
 const inter = Inter({ subsets: ["latin"] });
-
-//Write a fetcher function to wrap the native fetch function and return the result of a call to url in json format
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const maxColorQueries = 2;
 
@@ -22,12 +27,12 @@ type IndexPageProps = {};
 type IndexPageRef = React.ForwardedRef<HTMLDivElement>;
 
 function Home(props: IndexPageProps, ref: IndexPageRef) {
-  const { data, error } = useSWR("/api/color", fetcher);
   const router = useRouter();
   let [currentValue, setCurrentValue] = useState(
     parseColor("hsl(50, 100%, 50%)")
   );
-  const { colorQueries, setColorQueries } = useContext(ColorContext);
+  const { colorQueries, setColorQueries, skyColorData, setSkyPaletteKey } =
+    useContext(ColorContext);
   const [selectedColorQueryIndex, setSelectedColorQueryIndex] = useState(0);
 
   useEffect(() => {
@@ -36,6 +41,82 @@ function Home(props: IndexPageProps, ref: IndexPageRef) {
       setCurrentValue(parseColor(colorQuery));
     }
   }, [selectedColorQueryIndex]);
+
+  const extractRgbsOfCurrentSelection = useCallback(
+    (queries: Map<number, string>) => {
+      const colorQueries = Array.from(queries.values());
+      const rgbValues = colorQueries.map((colorQuery) => {
+        const color = parseColor(colorQuery).toString("rgb");
+        const rgbStringErased = color.replace("rgb(", "");
+        const endBracketRemoved = rgbStringErased.replace(")", "");
+        const rgb = endBracketRemoved.split(",");
+        const r = parseInt(rgb[0]);
+        const g = parseInt(rgb[1]);
+        const b = parseInt(rgb[2]);
+        return { r, g, b };
+      });
+      return rgbValues;
+    },
+    []
+  );
+
+  const findPaletteForColorRgbs = useCallback(
+    (colorRgbs: { r: number; g: number; b: number }[]) => {
+      if (!skyColorData) {
+        return {
+          key: "",
+          value: Number.MAX_SAFE_INTEGER,
+        };
+      }
+      const keys = Object.keys(skyColorData);
+      const minKey = {
+        key: "",
+        value: Number.MAX_SAFE_INTEGER,
+      };
+      for (const key of keys) {
+        const rgbArrayOfData = (skyColorData[key] as ColorRgb[]).map(
+          (colorRgb) => {
+            return colorRgb;
+          }
+        );
+        // find totalMinDifferece
+        const colorMinDiff = new Map<number, number>(
+          colorRgbs.map((_, idx) => {
+            return [idx, Number.MAX_SAFE_INTEGER];
+          })
+        );
+        // we check the min difference for each color
+        for (const rgb of rgbArrayOfData) {
+          const r = rgb.r;
+          const g = rgb.g;
+          const b = rgb.b;
+          for (let i = 0; i < colorRgbs.length; i++) {
+            const colorRgb = colorRgbs[i];
+            const diff = findColorDifference(colorRgb, { r, g, b });
+            const currentDiff = colorMinDiff.get(i);
+            if (currentDiff) {
+              if (diff < currentDiff) {
+                colorMinDiff.set(i, diff);
+              }
+            } else {
+              colorMinDiff.set(i, diff);
+            }
+          }
+        }
+        const totalMinDiff = Array.from(colorMinDiff.values()).reduce(
+          (acc, cur) => {
+            return acc + cur;
+          }
+        );
+        if (totalMinDiff < minKey.value) {
+          minKey.key = key;
+          minKey.value = totalMinDiff;
+        }
+      }
+      return minKey;
+    },
+    [skyColorData]
+  );
 
   return (
     <PageTransition ref={ref} exit={onTheLeft} initial={onTheLeft}>
@@ -90,7 +171,10 @@ function Home(props: IndexPageProps, ref: IndexPageRef) {
           <Button
             variant="primary"
             onPress={() => {
-              router.push("/palette");
+              const rgbs = extractRgbsOfCurrentSelection(colorQueries);
+              const skyPaletteKeyResult = findPaletteForColorRgbs(rgbs);
+              setSkyPaletteKey(skyPaletteKeyResult.key);
+              router.push(`/palette?key=${skyPaletteKeyResult.key}`);
             }}
           >
             Proceed to generate palette

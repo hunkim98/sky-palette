@@ -55,4 +55,7 @@ module.exports = {
     "@spectrum-icons/ui",
     "@spectrum-icons/workflow",
   ],
+  env: {
+    GOOGLE_MAP_API: process.env.GOOGLE_MAP_API,
+  },
 };

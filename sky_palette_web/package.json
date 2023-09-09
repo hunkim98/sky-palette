@@ -11,10 +11,12 @@
   "dependencies": {
     "@adobe/react-spectrum": "^3.29.0",
     "@react-spectrum/color": "^3.0.0-beta.24",
+    "@spectrum-icons/workflow": "^4.2.4",
     "@types/node": "20.5.7",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
     "autoprefixer": "10.4.15",
+    "axios": "^1.5.0",
     "eslint": "8.48.0",
     "eslint-config-next": "13.4.19",
     "framer-motion": "^10.16.4",
@@ -22,8 +24,12 @@
     "postcss": "8.4.29",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-simple-maps": "^3.0.0",
     "swr": "^2.2.2",
     "tailwindcss": "3.3.3",
     "typescript": "5.2.2"
+  },
+  "devDependencies": {
+    "@types/react-simple-maps": "^3.0.0"
   }
 }
